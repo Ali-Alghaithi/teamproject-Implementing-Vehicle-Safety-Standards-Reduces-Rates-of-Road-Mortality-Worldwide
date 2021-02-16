@@ -1,0 +1,149 @@
+\documentclass[ignorenonframetext,]{beamer}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\newif\ifbibliography
+\hypersetup{
+            pdftitle={Factors in Road Injury Accidents},
+            pdfauthor={Ali Al-Ghaithi, Matthew Pelz, Xuan-Ha Vandenberg},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
+\usepackage{caption}
+% These lines are needed to make table captions work with longtable:
+\makeatletter
+\def\fnum@table{\tablename~\thetable}
+\makeatother
+
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+
+\AtBeginPart{
+  \let\insertpartnumber\relax
+  \let\partname\relax
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \let\insertsectionnumber\relax
+    \let\sectionname\relax
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \let\insertsubsectionnumber\relax
+  \let\subsectionname\relax
+  \frame{\subsectionpage}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+\title{Factors in Road Injury Accidents}
+\author{\textbf{Ali Al-Ghaithi, Matthew Pelz, Xuan-Ha Vandenberg}}
+\date{12/10/2018}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Slide 1}
+
+\begin{longtable}[]{@{}lrrrrr@{}}
+\toprule
+& rural & aggregate & roadspending & congestion &
+deathsper100k\tabularnewline
+\midrule
+\endhead
+afghanistan & 90 & 0 & NA & NA & 15.5\tabularnewline
+albania & 80 & 0 & 107 & 0.3008905 & 15.1\tabularnewline
+algeria & 100 & 0 & NA & NA & 23.8\tabularnewline
+andorra & 90 & 7 & NA & NA & 7.6\tabularnewline
+angola & 90 & 0 & NA & NA & 26.9\tabularnewline
+antiguaandbarbuda & 64 & 0 & NA & NA & 6.7\tabularnewline
+\#\# Slide 2 & & & & &\tabularnewline
+\bottomrule
+\end{longtable}
+
+\end{frame}
+
+\begin{frame}{Road Deaths and Speed Limits}
+
+\begin{center}\includegraphics{Presentationslides_files/figure-beamer/unnamed-chunk-22-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Road Deaths and Speed Limits}
+
+\begin{center}\includegraphics{Presentationslides_files/figure-beamer/unnamed-chunk-23-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Road Deaths and Vehicle Safety Standards}
+
+\begin{center}\includegraphics{Presentationslides_files/figure-beamer/unnamed-chunk-24-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Road Deaths and Vehicle Safety Standards}
+
+\begin{center}\includegraphics{Presentationslides_files/figure-beamer/unnamed-chunk-25-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Road Deaths and Road Infrastructure Spending}
+
+\begin{center}\includegraphics{Presentationslides_files/figure-beamer/unnamed-chunk-26-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Road Deaths and Road Infrastructure Spending}
+
+\begin{center}\includegraphics{Presentationslides_files/figure-beamer/unnamed-chunk-27-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Road Deaths and Traffic Congestion}
+
+\begin{center}\includegraphics{Presentationslides_files/figure-beamer/unnamed-chunk-28-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Road Deaths and Traffic Congestion}
+
+\begin{center}\includegraphics{Presentationslides_files/figure-beamer/unnamed-chunk-29-1} \end{center}
+
+\href{https://pelzma.shinyapps.io/interactive_plot/}{Here}
+
+\end{frame}
+
+\end{document}

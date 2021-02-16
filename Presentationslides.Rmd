@@ -1,0 +1,413 @@
+---
+title: "Factors in Road Injury Accidents"
+author: '**Ali Al-Ghaithi, Matthew Pelz, Xuan-Ha Vandenberg**'
+date: "12/10/2018"
+output:
+  beamer_presentation: default
+  ioslides_presentation: default
+---
+
+
+
+## Slide 1
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.align='center')
+library(easypackages)
+my_packages <- c("maps", "ggplot2", "dplyr", "viridis","reshape2", "knitr", "tidyr", "ggmap", "gridExtra")
+libraries(my_packages)
+packages("maps", "ggplot2", "dplyr", "viridis","reshape2", "knitr", "tidyr", "ggmap", "gridExtra")
+
+```
+
+```{r}
+speedLimit <- read.csv("2013 max speed limit per country from WHO.csv", skip=1)
+```
+
+```{r}
+colnames(speedLimit) <- c("country", "year", "rural", "urban")
+levels(speedLimit$country) <- tolower(levels(speedLimit$country))
+speedLimit$rural <- gsub("~", "", speedLimit$rural)
+speedLimit$urban <- gsub("~", "", speedLimit$urban)
+speedLimit$rural <- gsub("100 - 130", "130", speedLimit$rural)
+speedLimit$rural <- gsub("48 - 72", "72", speedLimit$rural)
+speedLimit$rural <- gsub("50 - 110", "110", speedLimit$rural)
+speedLimit$rural <- gsub("20 - 90", "90", speedLimit$rural)
+speedLimit$rural <- gsub("40 - 121", "121", speedLimit$rural)
+speedLimit$urban <- gsub("20 - 70", "70", speedLimit$urban)
+speedLimit$urban <- gsub("24 - 72", "72", speedLimit$urban)
+speedLimit$urban <- gsub("32 - 105", "105", speedLimit$urban)
+speedLimit$country <- gsub(" ", "", speedLimit$country)
+speedLimit$country <- gsub("-", "", speedLimit$country)
+speedLimit$country <- gsub("'", "", speedLimit$country)
+speedLimit$country <- gsub("\\(", "", speedLimit$country)
+speedLimit$country <- gsub("\\)", "", speedLimit$country)
+speedLimit$country <- gsub("unitedstatesofamerica", "unitedstates", speedLimit$country)
+speedLimit$country <-gsub("unitedkingdomofgreatbritainandnorthernireland", "unitedkingdom", speedLimit$country)
+speedLimit$country <- gsub("unitedrepublicoftanzania", "tanzania", speedLimit$country)
+speedLimit$country <- gsub("theformeryugoslavrepublicofmacedonia", "macedonia", speedLimit$country)
+speedLimit$country <- gsub("russianfederation", "russia", speedLimit$country)
+speedLimit$country <- gsub("republicofkorea", "southkorea", speedLimit$country)
+speedLimit$country <- gsub("micronesiafederatedstatesof", "micronesia", speedLimit$country)
+speedLimit$country <- gsub("congo", "republicofthecongo", speedLimit$country)
+speedLimit$country <- gsub("democraticrepublicoftherepublicofthecongo", "democraticrepublicofthecongo", speedLimit$country)
+speedLimit$country <- gsub("laopeoplesdemocraticrepublic", "laos", speedLimit$country)
+speedLimit$country <- gsub("caboverde", "capeverde", speedLimit$country)
+speedLimit$country <- gsub("iranislamicrepublicof", "iran", speedLimit$country)
+speedLimit$country <- gsub("c?\\?tedivoire", "ivorycoast", speedLimit$country)
+speedLimit$country <- gsub("boliviaplurinationalstateof", "bolivia", speedLimit$country)
+speedLimit$country <- gsub("republicofmoldova", "moldova", speedLimit$country)
+suppressWarnings(speedLimit$rural <- as.numeric(speedLimit$rural))
+suppressWarnings(speedLimit$urban <- as.numeric(speedLimit$urban))
+```
+
+```{r}
+map.dat <- map_data("world")
+colnames(map.dat) <- c("long", "lat", "group", "order", "country", "subregion")
+map.dat$country <- tolower(map.dat$country)
+map.dat$country <- gsub(" ", "", map.dat$country)
+map.dat$country <- gsub("-", "", map.dat$country)
+map.dat$country <- gsub("'", "", map.dat$country)
+map.dat$country <- gsub("c?te d'ivoire", "ivorycoast", map.dat$country)
+map.dat$country <- gsub("uk", "unitedkingdom", map.dat$country)
+map.dat$country <- gsub("usa", "unitedstates", map.dat$country)
+map.dat$country <- gsub("czechrepublic", "czechia", map.dat$country)
+map.dat$country <- gsub("republicofcongo", "republicofthecongo", map.dat$country)
+map.dat$country <- gsub("swaziland", "eswatini", map.dat$country)
+map.dat$country <- gsub("unitedkingdomraine", "ukraine", map.dat$country)
+map.dat$country <- gsub("greenland", "denmark", map.dat$country)
+speedLimitMap <- full_join(map.dat, speedLimit, by = "country")
+speedLimitMap$rural <- as.character(speedLimitMap$rural)
+speedLimitMap$rural <- as.numeric(speedLimitMap$rural)
+speedLimitMap <- ggplot(speedLimitMap, aes(long,lat,group=group)) + geom_polygon(aes(fill=rural)) + labs(x = NULL, y = NULL, title = "Maximum speed by country (km)") + theme(legend.title=element_blank(), legend.text = element_text(size=12)) + theme(legend.position="bottom") + scale_fill_continuous(low="light blue", high="dark blue")
+```
+
+```{r}
+deathRates <- read.csv("http://apps.who.int/gho/athena/data/GHO/RS_196,RS_198?filter=COUNTRY:*&x-sideaxis=COUNTRY&x-topaxis=GHO;YEAR&profile=crosstable&format=csv", skip=1)
+deathRates <- select(deathRates, c(Country, X.2013.1))
+colnames(deathRates) <- c("country", "deathsper100k")
+deathRates$country <- tolower(deathRates$country)
+deathRates$country <- gsub(" ", "", deathRates$country)
+deathRates$country <- gsub("-", "", deathRates$country)
+deathRates$country <- gsub("'", "", deathRates$country)
+deathRates$country <- gsub("\\(", "", deathRates$country)
+deathRates$country <- gsub("\\)", "", deathRates$country)
+deathRates$country <- gsub("unitedstatesofamerica", "unitedstates", deathRates$country)
+deathRates$country <- gsub("unitedkingdomofgreatbritainandnorthernireland", "unitedkingdom", deathRates$country)
+deathRates$country <- gsub("democraticpeoplesrepublicofkorea", "northkorea", deathRates$country)
+deathRates$country <- gsub("congo", "republicofthecongo", deathRates$country)
+deathRates$country <- gsub("democraticrepublicoftherepublicofthecongo", "democraticrepublicofthecongo", deathRates$country)
+deathRates$country <- gsub("unitedrepublicoftanzania", "tanzania", deathRates$country)
+deathRates$country <- gsub("theformeryugoslavrepublicofmacedonia", "macedonia", deathRates$country)
+deathRates$country <- gsub("russianfederation", "russia", deathRates$country)
+deathRates$country <- gsub("republicofkorea", "southkorea", deathRates$country)
+deathRates$country <- gsub("syrianarabrepublic", "syria", deathRates$country)
+deathRates$country <- gsub("micronesiafederatedstatesof", "micronesia", deathRates$country)
+deathRates$country <- gsub("laopeoplesdemocraticrepublic", "laos", deathRates$country)
+deathRates$country <- gsub("iran(islamicrepublicof)", "iran", deathRates$country)
+deathRates$country <- gsub("caboverde", "capeverde", deathRates$country)
+deathRates$country <- gsub("c??tedivoire", "ivorycoast", deathRates$country)
+deathRates$country <- gsub("boliviaplurinationalstateof", "bolivia", deathRates$country)
+deathRates$country <- gsub("republicofmoldova", "moldova", deathRates$country)
+deathRates$country <- gsub("bruneidarussalam", "brunei", deathRates$country)
+deathRates$country <- gsub("venezuelabolivarianrepublicof", "venezuela", deathRates$country)
+```
+
+```{r}
+deathRatesMap <- full_join(map.dat, deathRates, by = "country")
+deathRatesMap <- ggplot(deathRatesMap, aes(long,lat,group=group)) + geom_polygon(aes(fill=deathsper100k)) + labs(x = NULL, y = NULL, title = "Road deaths per 100,000 people") + theme(legend.title=element_blank(), legend.text = element_text(size=12)) + theme(legend.position="bottom") + scale_fill_continuous(low="pink", high="dark red")
+```
+
+```{r}
+safety <- read.csv("2013 vehicle safety standards who.csv", skip=1)
+```
+
+```{r}
+colnames(safety) <- c("country", "year", "seatbelts", "seatbeltanchorages", "sideimpact", "frontalimpact", "electronicstabilitycontrol", "pedestrianprotection", "childseats")
+
+levels(safety$country) <- tolower(levels(safety$country))
+safety$country <- gsub(" ", "", safety$country)
+safety$country <- gsub("-", "", safety$country)
+safety$country <- gsub("'", "", safety$country)
+safety$country <- gsub("\\(", "", safety$country)
+safety$country <- gsub("\\)", "", safety$country)
+safety$country <- gsub("unitedstatesofamerica", "unitedstates", safety$country)
+safety$country <- gsub("unitedkingdomofgreatbritainandnorthernireland", "unitedkingdom", safety$country)
+safety$country <- gsub("unitedrepublicoftanzania", "tanzania", safety$country)
+safety$country <- gsub("theformeryugoslavrepublicofmacedonia", "macedonia", safety$country)
+safety$country <- gsub("russianfederation", "russia", safety$country)
+safety$country <- gsub("republicofkorea", "southkorea", safety$country)
+safety$country <- gsub("micronesiafederatedstatesof", "micronesia", safety$country)
+safety$country <- gsub("laopeoplesdemocraticrepublic", "laos", safety$country)
+safety$country <- gsub("iranislamicrepublicof", "iran", safety$country)
+safety$country <- gsub("c?\\?tedivoire", "ivorycoast", safety$country)
+safety$country <- gsub("caboverde", "capeverde", safety$country)
+safety$country <- gsub("congo", "republicofthecongo", safety$country)
+safety$country <- gsub("democraticrepublicoftherepublicofthecongo", "democraticrepublicofthecongo", safety$country)
+safety$country <- gsub("boliviaplurinationalstateof", "bolivia", safety$country)
+safety$country <- gsub("republicofmoldova", "moldova", safety$country)
+```
+
+```{r}
+safetyBoolean <- safety
+safetyBoolean$seatbelts <- gsub("Yes", "1", safetyBoolean$seatbelts)
+safetyBoolean$seatbelts <- gsub("No", "0", safetyBoolean$seatbelts)
+safetyBoolean$seatbelts <- suppressWarnings(as.numeric(safetyBoolean$seatbelts))
+safetyBoolean$seatbeltanchorages <- gsub("Yes", "1", safetyBoolean$seatbeltanchorages)
+safetyBoolean$seatbeltanchorages <- gsub("No", "0", safetyBoolean$seatbeltanchorages)
+safetyBoolean$seatbeltanchorages <-suppressWarnings( as.numeric(safetyBoolean$seatbeltanchorages))
+safetyBoolean$sideimpact <- gsub("Yes", "1", safetyBoolean$sideimpact)
+safetyBoolean$sideimpact <- gsub("No", "0", safetyBoolean$sideimpact)
+safetyBoolean$sideimpact <-suppressWarnings( as.numeric(safetyBoolean$sideimpact))
+safetyBoolean$frontalimpact <- gsub("Yes", "1", safetyBoolean$frontalimpact)
+safetyBoolean$frontalimpact <- gsub("No", "0", safetyBoolean$frontalimpact)
+safetyBoolean$frontalimpact <-suppressWarnings( as.numeric(safetyBoolean$frontalimpact))
+safetyBoolean$electronicstabilitycontrol <- gsub("Yes", "1", safetyBoolean$electronicstabilitycontrol)
+safetyBoolean$electronicstabilitycontrol <- gsub("No", "0", safetyBoolean$electronicstabilitycontrol)
+safetyBoolean$electronicstabilitycontrol <-suppressWarnings( as.numeric(safetyBoolean$electronicstabilitycontrol))
+safetyBoolean$pedestrianprotection <- gsub("Yes", "1", safetyBoolean$pedestrianprotection)
+safetyBoolean$pedestrianprotection <- gsub("No", "0", safetyBoolean$pedestrianprotection)
+safetyBoolean$pedestrianprotection <-suppressWarnings( as.numeric(safetyBoolean$pedestrianprotection))
+safetyBoolean$childseats <- gsub("Yes", "1", safetyBoolean$childseats)
+safetyBoolean$childseats <- gsub("No", "0", safetyBoolean$childseats)
+safetyBoolean$childseats <-suppressWarnings( as.numeric(safetyBoolean$childseats))
+safetyBoolean$aggregate <- safetyBoolean$seatbelts + safetyBoolean$seatbeltanchorages + safetyBoolean$sideimpact + safetyBoolean$frontalimpact + safetyBoolean$electronicstabilitycontrol + safetyBoolean$pedestrianprotection + safetyBoolean$childseats
+```
+
+```{r}
+safetyMap <- full_join(map.dat, safetyBoolean, by = "country")
+safetyMap <- ggplot(safetyMap, aes(long,lat,group=group)) + geom_polygon(aes(fill=aggregate)) + labs(x = NULL, y = NULL, title = "Number of vehicle safety standards") + theme(legend.title=element_blank(), legend.text = element_text(size=12)) + theme(legend.position="bottom") + scale_fill_continuous(low="light blue", high="dark blue")
+```
+
+```{r}
+invest <- read.csv("road infrastructure investment in current USD per inhabitant.csv")
+```
+
+```{r}
+invest <- select(invest, c(Country, Indicator, Year, Value))
+q <- dcast(invest, Country + Indicator~Year, value.var='Value')
+invest <- select(q, c(Country, Indicator, '2013'))
+p <- dcast(invest, Country~Indicator, value.var='2013')
+invest <- select(p, c(Country, 'Road infrastructure investment in current USD per inhabitant'))
+levels(invest$Country) <- tolower(levels(invest$Country))
+colnames(invest) <- c("country", "roadspending")
+invest$country <- gsub(" ", "", invest$country)
+invest$country <- gsub("-", "", invest$country)
+invest$country <- gsub("'", "", invest$country)
+invest$country <- gsub("russianfederation", "russia", invest$country)
+invest$country <- gsub("serbia,republicof", "serbia", invest$country)
+invest$country <- gsub("montenegro,republicof", "montenegro", invest$country)
+invest$country <- gsub("slovakrepublic", "slovakia", invest$country)
+invest$country <- gsub("czechrepublic", "czechia", invest$country)
+invest$country <- gsub("fyrom", "macedonia", invest$country)
+invest$country <- gsub("bosniaherzegovina", "bosniaandherzegovina", invest$country)
+invest$country <- gsub("korea", "southkorea", invest$country)
+```
+
+```{r}
+investMap <- full_join(map.dat, invest, by = "country")
+investMap <- ggplot(investMap, aes(long,lat,group=group)) + geom_polygon(aes(fill=roadspending)) + labs(x = NULL, y = NULL, title = "Road investment in USD per capita") + theme(legend.title=element_blank()) + theme(legend.position="bottom") + scale_fill_continuous(low="light blue", high="dark blue")
+```
+
+```{r}
+passengerKmMil <- read.csv("millions of passenger km.csv")
+```
+
+```{r}
+passengerKmMil <- select(passengerKmMil, c(Country, Variable, Year, Value))
+s <- dcast(passengerKmMil, Country + Variable~Year, value.var='Value')
+passengerKmMil <- select(s, c(Country, Variable, '2013'))
+t <- dcast(passengerKmMil, Country~Variable, value.var='2013')
+passengerKmMil <- select(t, c(Country, 'Road passenger transport'))
+levels(passengerKmMil$Country) <- tolower(levels(passengerKmMil$Country))
+colnames(passengerKmMil) <- c("country", "roadpassengerkm")
+passengerKmMil$country <- gsub(" ", "", passengerKmMil$country)
+passengerKmMil$country <- gsub("-", "", passengerKmMil$country)
+passengerKmMil$country <- gsub("'", "", passengerKmMil$country)
+passengerKmMil$country <- gsub("russianfederation", "russia", passengerKmMil$country)
+passengerKmMil$country <- gsub("serbia,republicof", "serbia", passengerKmMil$country)
+passengerKmMil$country <- gsub("montenegro,republicof", "montenegro", passengerKmMil$country)
+passengerKmMil$country <- gsub("slovakrepublic", "slovakia", passengerKmMil$country)
+passengerKmMil$country <- gsub("fyrom", "macedonia", passengerKmMil$country)
+passengerKmMil$country <- gsub("bosniaherzegovina", "bosniaandherzegovina", passengerKmMil$country)
+passengerKmMil$country <- gsub("czechrepublic", "czechia", passengerKmMil$country)
+passengerKmMil$country <- gsub("korea", "southkorea", passengerKmMil$country)
+```
+
+```{r}
+roadKM <- read.delim("https://www.cia.gov/library/publications/the-world-factbook/rankorder/rawdata_2147.txt", sep="", row.names=NULL, head=FALSE)
+```
+
+```{r}
+roadKM$V2 <- as.character(roadKM$V2)
+roadKM$V3 <- as.character(roadKM$V3)
+roadKM[4,2] = "unitedstates"
+roadKM[4,3] = "9,833,517"
+roadKM[12,2] = "democraticrepublicofthecongo"
+roadKM[12,3] = "2344858"
+roadKM[15,2] = "saudiarabia"
+roadKM[15,3] = "2,149,690"
+roadKM[27,2] = "southafrica"
+roadKM[27,3] = "1,219,090"
+roadKM[44,2] = "southsudan"
+roadKM[44,3] = "644,329"
+roadKM[47,2] = "centralafricanrepublic"
+roadKM[47,3] = "622,984"
+roadKM[56,2] = "papuanewguinea"
+roadKM[56,3] = "462,840"
+roadKM[68,2] = "republicofthecongo"
+roadKM[68,3] = "342,000"
+roadKM[74,2] = "ivorycoast"
+roadKM[74,3] = "322,463"
+roadKM[80,2] = "burkinafaso"
+roadKM[80,3] = "274,200"
+roadKM[81,2] = "newzealand"
+roadKM[81,3] = "268,838"
+roadKM[83,2] = "westernsahara"
+roadKM[83,3] = "266,000"
+roadKM[85,2] = "unitedkingdom"
+roadKM[85,3] = "243,610"
+roadKM[104,2] = "northkorea"
+roadKM[104,3] = "120,538"
+roadKM[114,2] = "southkorea"
+roadKM[114,3] = "99,720"
+roadKM[120,2] = "unitedarabemirates"
+roadKM[120,3] = "83,600"
+roadKM[125,2] = "sierraleone"
+roadKM[125,3] = "71,740"
+roadKM[128,2] = "srilanka"
+roadKM[128,3] = "65,610"
+roadKM[134,2] = "bosniaandherzegovina"
+roadKM[134,3] = "51,197"
+roadKM[136,2] = "costarica"
+roadKM[136,3] = "51,100"
+roadKM[138,2] = "dominicanrepublic"
+roadKM[138,3] = "48,670"
+roadKM[150,2] = "solomonislands"
+roadKM[150,3] = "28,896"
+roadKM[152,2] = "equatorialguinea"
+roadKM[152,3] = "28,051"
+roadKM[159,2] = "elsalvador"
+roadKM[159,3] = "21,041"
+roadKM[167,2] = "bahamas"
+roadKM[167,3] = "13,880"
+roadKM[173,2] = "gambia"
+roadKM[173,3] = "11,300"
+roadKM[181,2] = "trinidadandtobago"
+roadKM[181,3] = "5,128"
+roadKM[194,2] = "saotomeandprincipe"
+roadKM[194,3] = "964"
+roadKM[202,2] = "micronesia"
+roadKM[202,3] = "702"
+roadKM[205,2] = "saintlucia"
+roadKM[205,3] = "616"
+roadKM[215,2] = "antiguaandbarbuda"
+roadKM[215,3] = "443"
+roadKM[223,2] = "saintvincentandthegrenadines"
+roadKM[223,3] = "389"
+roadKM[238,2] = "marshallislands"
+roadKM[238,3] = "181"
+roadKM$V3 <- gsub(",", "", roadKM$V3)
+roadKM$V3 <- suppressWarnings(as.numeric(roadKM$V3))
+roadKM <- select(roadKM, c(V2, V3))
+roadKM <- roadKM[complete.cases(roadKM), ]
+colnames(roadKM) <- c("country", "kmofroad")
+roadKM$country <- tolower(roadKM$country)
+roadKM$country <- gsub(" ", "", roadKM$country)
+roadKM$country <- gsub("-", "", roadKM$country)
+roadKM$country <- gsub("'", "", roadKM$country)
+roadKM$country <- gsub("russianfederation", "russia", roadKM$country)
+roadKM$country <- gsub("serbia,republicof", "serbia", roadKM$country)
+roadKM$country <- gsub("montenegro,republicof", "montenegro", roadKM$country)
+roadKM$country <- gsub("slovakrepublic", "slovakia", roadKM$country)
+roadKM$country <- gsub("fyrom", "macedonia", roadKM$country)
+roadKM$country <- gsub("bosniaherzegovina", "bosniaandherzegovina", roadKM$country)
+roadKM$country <- gsub("czechrepublic", "czechia", roadKM$country)
+roadKM$country <- gsub("korea", "southkorea", roadKM$country)
+```
+
+```{r}
+congestion <- full_join(passengerKmMil, roadKM, by = "country")
+congestion <- congestion[complete.cases(congestion), ]
+congestion$congestion <- congestion$roadpassengerkm/congestion$kmofroad
+```
+
+```{r}
+congestionMap <- full_join(map.dat, congestion, by = "country")
+congestionMap <- ggplot(congestionMap, aes(long,lat,group=group)) + geom_polygon(aes(fill=congestion)) + labs(x = NULL, y = NULL, title = "Passenger-km per km of road") + theme(legend.title=element_blank(), legend.text = element_text(size=12)) + theme(legend.position="bottom") + scale_fill_continuous(low="light blue", high="dark blue")
+```
+
+```{r}
+roadMortalityFactors <- full_join(speedLimit, safetyBoolean, by = c("country"))
+roadMortalityFactors <- select(roadMortalityFactors, c("country", "rural", "aggregate"))
+roadMortalityFactors <-  full_join(roadMortalityFactors, invest, by = "country")
+roadMortalityFactors <-  full_join(roadMortalityFactors, congestion, by = "country")
+roadMortalityFactors <- select(roadMortalityFactors, c("country", "rural", "aggregate", "roadspending", "congestion"))
+roadMortalityFactors <-  full_join(roadMortalityFactors, deathRates, by = "country")
+roadMortalityFactors$rural <- as.character(roadMortalityFactors$rural)
+roadMortalityFactors$rural <- as.numeric(roadMortalityFactors$rural)
+rownames(roadMortalityFactors)<-roadMortalityFactors[,1]
+roadMortalityFactors <- select(roadMortalityFactors, c("rural", "aggregate", "roadspending", "congestion", "deathsper100k"))
+```
+
+
+```{r} 
+kable(head(roadMortalityFactors))
+```
+## Slide 2
+```{r}
+colnames(roadMortalityFactors) <- c("x1", "x2", "x3", "x4", "y")
+```
+## Road Deaths and Speed Limits
+
+```{r}
+grid.arrange(speedLimitMap, deathRatesMap, ncol=2)
+
+```
+
+## Road Deaths and Speed Limits
+
+```{r}
+suppressWarnings(print(ggplot(roadMortalityFactors,aes(x1, y)) + geom_point() + geom_smooth(method="lm") + xlab("Maximum Speed Limit") + ylab("Annual Road Deaths per 100k")))
+```
+
+## Road Deaths and Vehicle Safety Standards
+
+```{r}
+grid.arrange(safetyMap, deathRatesMap, ncol=2)
+```
+
+## Road Deaths and Vehicle Safety Standards
+
+```{r}
+suppressWarnings(print(ggplot(roadMortalityFactors,aes(x2, y)) + geom_point() + geom_smooth(method="lm")+ xlab("Number of Vehicle Safety Standards") + ylab("Annual Road Deaths per 100k")))
+```
+
+## Road Deaths and Road Infrastructure Spending
+
+```{r}
+grid.arrange(investMap, deathRatesMap, ncol=2)
+```
+
+## Road Deaths and Road Infrastructure Spending
+
+```{r}
+suppressWarnings(print(ggplot(roadMortalityFactors,aes(x3, y)) + geom_point() + geom_smooth(method="lm")+ xlab("Annual Road Investment in Millions of US$") + ylab("Annual Road Deaths per 100k")))
+```
+## Road Deaths and Traffic Congestion
+
+```{r}
+grid.arrange(congestionMap, deathRatesMap, ncol=2)
+```
+
+
+## Road Deaths and Traffic Congestion
+
+```{r}
+suppressWarnings(print(ggplot(roadMortalityFactors,aes(x4, y)) + geom_point() + geom_smooth(method="lm")+ xlab("Congestion Metric") + ylab("Annual Road Deathers per 100k")))
+```
+
+
+
+[Here](https://pelzma.shinyapps.io/interactive_plot/)
